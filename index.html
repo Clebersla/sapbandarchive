@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Sap Archive - Upload</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Sap Archive — Upload</h1>
+
+  <div id="auth">
+    <h3>Register / Login</h3>
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button id="signup">Sign up</button>
+    <button id="login">Log in</button>
+    <button id="logout" style="display:none;">Log out</button>
+    <p id="userInfo"></p>
+  </div>
+
+  <hr>
+
+  <div id="uploader" style="display:none;">
+    <h3>Upload file</h3>
+    <input id="fileName" type="text" placeholder="File display name">
+    <select id="category">
+      <option value="videos">Videos</option>
+      <option value="demos">Demos</option>
+      <option value="photos">Photos</option>
+      <option value="downloads">Downloads</option>
+    </select>
+    <input id="fileInput" type="file">
+    <button id="uploadBtn">Upload</button>
+
+    <p id="status"></p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    // ==== CONFIGURE AQUI ====
+    const SUPABASE_URL = "https://your-project-ref.supabase.co"; // substitute
+    const SUPABASE_ANON_KEY = "public-anon-key-goes-here";      // substitute
+    const BUCKET_NAME = "sap-files"; // nome do bucket que você criou
+    // ========================
+
+    const supabase = supabaseLib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // DOM
+    const emailIn = document.getElementById('email');
+    const passIn = document.getElementById('password');
+    const signupBtn = document.getElementById('signup');
+    const loginBtn = document.getElementById('login');
+    const logoutBtn = document.getElementById('logout');
+    const userInfo = document.getElementById('userInfo');
+
+    const uploader = document.getElementById('uploader');
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const status = document.getElementById('status');
+    const fileNameInput = document.getElementById('fileName');
+    const categoryInput = document.getElementById('category');
+
+    // signup
+    signupBtn.addEventListener('click', async () => {
+      const email = emailIn.value;
+      const password = passIn.value;
+      if (!email || !password) return alert('email and password required');
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) alert(error.message); else alert('Check your email to confirm (if enabled). You can login after.');
+    });
+
+    // login
+    loginBtn.addEventListener('click', async () => {
+      const email = emailIn.value;
+      const password = passIn.value;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) alert(error.message);
+      else {
+        onAuthChange();
+      }
+    });
+
+    // logout
+    logoutBtn.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      onAuthChange();
+    });
+
+    // auth state on load
+    supabase.auth.getSession().then(onAuthChange);
+    supabase.auth.onAuthStateChange((_event, session) => onAuthChange());
+
+    async function onAuthChange() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && session.user) {
+        userInfo.textContent = `Logged in as ${session.user.email}`;
+        logoutBtn.style.display = 'inline';
+        uploader.style.display = 'block';
+      } else {
+        userInfo.textContent = 'Not logged in';
+        logoutBtn.style.display = 'none';
+        uploader.style.display = 'none';
+      }
+    }
+
+    // upload
+    uploadBtn.addEventListener('click', async () => {
+      const file = fileInput.files[0];
+      if (!file) return alert('Select a file');
+      const displayName = fileNameInput.value || file.name;
+      const category = categoryInput.value || 'downloads';
+      // create a unique path: category/timestamp_filename
+      const timestamp = Date.now();
+      const path = `${category}/${timestamp}_${file.name}`;
+
+      status.textContent = 'Uploading...';
+
+      const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(path, file, { cacheControl: '3600', upsert: false });
+      if (error) {
+        status.textContent = 'Upload failed: ' + error.message;
+        return;
+      }
+
+      // get public URL (if bucket public) or create signed url
+      const { publicUrl, error: pubErr } = supabase.storage.from(BUCKET_NAME).getPublicUrl(path);
+      if (pubErr) {
+        status.textContent = 'Error getting URL: ' + pubErr.message;
+        return;
+      }
+
+      // You can now save metadata (displayName, category, publicUrl, uploaded_by) in a JSON
+      // For simplicity, we'll show the URL
+      status.innerHTML = `Uploaded! <a href="${publicUrl}" target="_blank">Download file</a>`;
+
+      // OPTIONAL: store metadata in Supabase table (if you create a table 'files')
+      // await supabase.from('files').insert([{ name: displayName, path, category, url: publicUrl, uploaded_by: supabase.auth.user().email }]);
+    });
+
+  </script>
+</body>
+</html>
