@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Category - Sap Archive</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1 id="catTitle"></h1>
+  <a href="index.html">← Back to Home</a>
+  <ul id="fileList"></ul>
+
+  <script>
+    // Define arquivos de exemplo (links do Google Drive, Dropbox, etc.)
+    const files = [
+      { name: "Demo 1", category: "demos", url: "https://example.com/demo1.mp3" },
+      { name: "Video 1", category: "videos", url: "https://example.com/video1.mp4" },
+      { name: "Photo 1", category: "photos", url: "https://example.com/photo1.jpg" },
+      { name: "Download Pack", category: "downloads", url: "https://example.com/files.zip" }
+    ];
+
+    // Lê categoria da URL
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get("cat") || "videos";
+    document.getElementById("catTitle").textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+
+    const list = document.getElementById("fileList");
+    files.filter(f => f.category === cat).forEach(f => {
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="${f.url}" target="_blank">${f.name}</a>`;
+      list.appendChild(li);
+    });
+  </script>
+</body>
+</html>
