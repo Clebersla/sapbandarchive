@@ -1,0 +1,6 @@
+div#logincontainer { border: 1px solid #000; margin: 0 auto; text-align: left; width: 350px; }
+div#logintop { background-color: #000; border-bottom: 1px solid #000; color: #fff; text-align: center; }
+  div#logintop h1 { font-weight: bold; font-size: 1.7em; margin: 0; padding: 5px; }
+div#loginbody { padding: 0 15px; }
+div#loginbottom { border-top: 1px solid #000; margin: 0; padding: 5px; text-align: center; }
+  div#loginbottom p { padding: 0; margin: 0; }
