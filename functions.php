@@ -7,6 +7,39 @@
 #                                               #
 #################################################
 
+// Função interna para gerenciar a conexão com SSL (Aiven)
+function db_connect() {
+    require("./config.php");
+    
+    // Separa o host da porta (ex: mysql-9e6...com:13385)
+    $host_parts = explode(':', $host);
+    $hostname = $host_parts[0];
+    $port = isset($host_parts[1]) ? (int)$host_parts[1] : 3306;
+
+    $database = mysqli_init();
+    
+    // Configura o SSL como requerido pelo Aiven
+    mysqli_ssl_set($database, NULL, NULL, NULL, NULL, NULL);
+
+    // Estabelece a conexão com SSL ativo
+    $success = mysqli_real_connect(
+        $database, 
+        $hostname, 
+        $user, 
+        $pass, 
+        $dat, 
+        $port, 
+        NULL, 
+        MYSQLI_CLIENT_SSL
+    );
+
+    if (!$success) {
+        die("<p>Erro de Conexão: " . mysqli_connect_error() . "</p>\n");
+    }
+
+    return $database;
+}
+
 function getCharset()
 {
     require("./config.php");
@@ -16,7 +49,7 @@ function getCharset()
 function installedTables()
 {
     require("./config.php");
-    $database = @mysqli_connect($host, $user, $pass, $dat) or die("<p>" . mysqli_connect_error() . "</p>\n");
+    $database = db_connect();
     $result = mysqli_query($database, "SHOW TABLES") or die("<p>" . mysqli_error($database) . "</p>\n");
     $array = array();
     while ($row = mysqli_fetch_row($result))
@@ -30,7 +63,7 @@ function installedTables()
 function getCollectionSettings($info)
 {
     require("./config.php");
-    $database = @mysqli_connect($host, $user, $pass, $dat) or die("<p>" . mysqli_connect_error() . "</p>\n");
+    $database = db_connect();
     $getSettings = mysqli_query($database, "SELECT " . $info . " FROM " . $tablestart . "settings LIMIT 1") or die("<p>" . mysqli_error($database) . "</p>\n");
     $settingsData = mysqli_fetch_array($getSettings);
     mysqli_close($database);
@@ -40,7 +73,7 @@ function getCollectionSettings($info)
 function countRecords()
 {
     require("./config.php");
-    $database = @mysqli_connect($host, $user, $pass, $dat) or die("<p>" . mysqli_connect_error() . "</p>\n");
+    $database = db_connect();
     $res = mysqli_query($database, "SELECT id FROM " . $tablestart . "collection");
     $count = mysqli_num_rows($res);
     mysqli_close($database);
@@ -50,7 +83,7 @@ function countRecords()
 function countAttribute($case)
 {
     require("./config.php");
-    $database = @mysqli_connect($host, $user, $pass, $dat) or die("<p>" . mysqli_connect_error() . "</p>\n");
+    $database = db_connect();
     $res = mysqli_query($database, "SELECT COUNT(id) as cnt, " . $case . " FROM " . $tablestart . "collection GROUP BY " . $case);
     $count = mysqli_num_rows($res);
     mysqli_close($database);
@@ -60,10 +93,8 @@ function countAttribute($case)
 function getRecords($start, $limit, $order)
 {
     require("./config.php");
-    $database = @mysqli_connect($host, $user, $pass, $dat) or die("<p>" . mysqli_connect_error() . "</p>\n");
+    $database = db_connect();
     $sql = mysqli_query($database, "SELECT * FROM " . $tablestart . "collection ORDER BY " . $order . " LIMIT " . (int)$start . ", " . (int)$limit) or die("<p>" . mysqli_error($database) . "</p>\n");
-    // Nota: Em mysqli, se você fechar a conexão aqui, o resultado pode dar erro ao ser lido depois. 
-    // Recomenda-se fechar após o uso no arquivo que chama a função.
     return $sql;
 }
 
@@ -117,7 +148,7 @@ function createPagingList($numRecords, $limit, $display, $sort)
 function createToplist($case, $limit)
 {
     require("./config.php");
-    $database = @mysqli_connect($host, $user, $pass, $dat) or die("<p>" . mysqli_connect_error() . "</p>\n");
+    $database = db_connect();
     $sql = mysqli_query($database, "SELECT COUNT(id) as cnt, " . $case . " FROM " . $tablestart . "collection GROUP BY " . $case . " ORDER BY cnt DESC LIMIT " . (int)$limit) or die("<p>" . mysqli_error($database) . "</p>\n");
     $list = "<ol>\n";
     while ($data = mysqli_fetch_array($sql))
