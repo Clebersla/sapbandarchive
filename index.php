@@ -12,7 +12,7 @@ include("./language.php");
 
 header("content-type:text/html;charset=".getCharset()."");
 
-// Verifica se as tabelas foram criadas no Aiven
+// Verifica se as tabelas existem no banco de dados
 if (count(installedTables()) == 0)
 {
 	echo $lang_noInstall;
@@ -27,14 +27,18 @@ echo getCollectionSettings("name");
 if (isset($_GET['show']) && is_numeric($_GET['show']))
 	echo " - " . $lang_page . " " . $_GET['show'];
 ?></title>
-  <link href="style.css" rel="stylesheet" type="text/css" media="screen">
+  <link href="style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 <?php
 echo "<h1>" . getCollectionSettings("name") . "</h1>\n";
 
-/* Menu */
-echo "<ul>\n  <li><a href=\"./\">" . $lang_frontpage . "</a></li>\n  <li><a href=\"./statistics.php\">" . $lang_statistics . "</a></li>\n</ul>\n";
+/* Menu - Agora com a opção de Login para Upload */
+echo "<ul>\n";
+echo "  <li><a href=\"./\">" . $lang_frontpage . "</a></li>\n";
+echo "  <li><a href=\"./statistics.php\">" . $lang_statistics . "</a></li>\n";
+echo "  <li><a href=\"./admin.php\">" . $lang_login . "</a></li>\n";
+echo "</ul>\n";
 
 /* Limit-control */
 if (getCollectionSettings("persite") == "all")
@@ -68,10 +72,7 @@ else
 
 /* Output list */
 $records = getRecords($start, $limit, $order);
-
-// CORREÇÃO: No PHP 8.2 usamos mysqli_num_rows
-$num = mysqli_num_rows($records); 
-
+$num = mysqli_num_rows($records); // Atualizado para mysqli
 if ($num > 0)
 {
 	echo "<table>
@@ -87,9 +88,7 @@ if ($num > 0)
     </tr>
   </thead>
   <tbody>\n";
-
-	// CORREÇÃO: No PHP 8.2 usamos mysqli_fetch_array
-	while ($data = mysqli_fetch_array($records)) 
+	while ($data = mysqli_fetch_array($records)) // Atualizado para mysqli
 	{
 		echo "    <tr>
       <td headers=\"artist\">" . $data['artist'] . "</td>
