@@ -2,19 +2,16 @@
 #################################################
 #                                               #
 #   Impleo Musiksamling 1.0                     #
-#   (c) 2006 Christoffer Kjeldgaard Petersen    #
-#   http://sappy.dk/impleo/                     #
 #                                               #
 #################################################
 
-// Databaseforbindelsesoplysninger
-$host = "sql203.byetcluster.com"; // Hostname (Server)
-$user = "if0_40206118_2";         // Brugernavn
-$pass = "d-QH8S1)p5";             // Adgangskode
+// Dados de conexão do Aiven (Copiados da imagem)
+$host = "mysql-9e6da9f-saparchive.c.aivencloud.com:13385"; // Host + Porta
+$user = "avnadmin"; 
+$pass = "AVNS_Z_eQYX9km-KNSiyVWwy"; 
+$dat = "defaultdb"; 
 
-$dat = "if0_40206118_i68";        // Databasenavn
+$tablestart = "impleor7_"; 
 
-$tablestart = "impleor7_";        // Præfiks til tabeller
-
-$charset = "utf-8";               // Tegnsæt
+$charset = "utf-8"; 
 ?>
