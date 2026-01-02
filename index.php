@@ -2,6 +2,8 @@
 #################################################
 #                                               #
 #   Impleo Musiksamling 1.0                     #
+#   (c) 2006 Christoffer Kjeldgaard Petersen    #
+#   http://sappy.dk/impleo/                     #
 #                                               #
 #################################################
 
@@ -10,7 +12,7 @@ include("./language.php");
 
 header("content-type:text/html;charset=".getCharset()."");
 
-// Verifica se as tabelas existem (já criadas anteriormente)
+// Verifica se as tabelas foram criadas no Aiven
 if (count(installedTables()) == 0)
 {
 	echo $lang_noInstall;
@@ -25,7 +27,7 @@ echo getCollectionSettings("name");
 if (isset($_GET['show']) && is_numeric($_GET['show']))
 	echo " - " . $lang_page . " " . $_GET['show'];
 ?></title>
-  <link href="style.css" rel="stylesheet" type="text/css">
+  <link href="style.css" rel="stylesheet" type="text/css" media="screen">
 </head>
 <body>
 <?php
@@ -66,7 +68,10 @@ else
 
 /* Output list */
 $records = getRecords($start, $limit, $order);
-$num = mysqli_num_rows($records);
+
+// CORREÇÃO: No PHP 8.2 usamos mysqli_num_rows
+$num = mysqli_num_rows($records); 
+
 if ($num > 0)
 {
 	echo "<table>
@@ -82,7 +87,9 @@ if ($num > 0)
     </tr>
   </thead>
   <tbody>\n";
-	while ($data = mysqli_fetch_array($records))
+
+	// CORREÇÃO: No PHP 8.2 usamos mysqli_fetch_array
+	while ($data = mysqli_fetch_array($records)) 
 	{
 		echo "    <tr>
       <td headers=\"artist\">" . $data['artist'] . "</td>
