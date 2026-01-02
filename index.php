@@ -9,7 +9,43 @@
 
 include("./functions.php");
 include("./language.php");
+
+// --- INICIO DO INSTALADOR AUTOMATICO ---
+$db = db_connect(); // Conecta usando a função com SSL que criamos
+
+// Tabelas necessárias para o script de 2006
+$sql1 = "CREATE TABLE IF NOT EXISTS `impleor7_settings` (
+  `id` int(11) NOT NULL auto_increment,
+  `name` varchar(255) NOT NULL,
+  `persite` varchar(255) NOT NULL DEFAULT '10',
+  `admin_user` varchar(255) NOT NULL,
+  `admin_pass` varchar(255) NOT NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB;";
+
+$sql2 = "CREATE TABLE IF NOT EXISTS `impleor7_collection` (
+  `id` int(11) NOT NULL auto_increment,
+  `artist` varchar(255) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `year` varchar(4) NOT NULL,
+  `format` varchar(255) NOT NULL,
+  `label` varchar(255) NOT NULL,
+  `comment` text NOT NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB;";
+
+mysqli_query($db, $sql1);
+mysqli_query($db, $sql2);
+
+// Verifica se já existe configuração, se não, insere o padrão
+$check = mysqli_query($db, "SELECT id FROM impleor7_settings LIMIT 1");
+if (mysqli_num_rows($check) == 0) {
+    mysqli_query($db, "INSERT INTO impleor7_settings (name, persite, admin_user, admin_pass) VALUES ('Arquivo da Banda', '10', 'admin', 'admin')");
+}
+// --- FIM DO INSTALADOR AUTOMATICO ---
+
 header("content-type:text/html;charset=".getCharset()."");
+
 if (count(installedTables()) == 0)
 {
 	echo $lang_noInstall;
@@ -65,7 +101,7 @@ else
 
 /* Output list */
 $records = getRecords($start, $limit, $order);
-$num = mysql_num_rows($records);
+$num = mysqli_num_rows($records); // Atualizado para mysqli
 if ($num > 0)
 {
 	echo "<table>
@@ -81,7 +117,7 @@ if ($num > 0)
     </tr>
   </thead>
   <tbody>\n";
-	while ($data = mysql_fetch_array($records))
+	while ($data = mysqli_fetch_array($records)) // Atualizado para mysqli
 	{
 		echo "    <tr>
       <td headers=\"artist\">" . $data['artist'] . "</td>
