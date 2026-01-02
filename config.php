@@ -7,13 +7,14 @@
 #                                               #
 #################################################
 
-$host = "sql203.byetcluster.com"; // Hostname
-$user = "40206118_2"; // Username
-$pass = "d-QH8S1)p5"; // Password
+// Databaseforbindelsesoplysninger
+$host = "sql203.byetcluster.com"; // Hostname (Server)
+$user = "if0_40206118_2";         // Brugernavn
+$pass = "d-QH8S1)p5";             // Adgangskode
 
-$dat = "if0_40206118_i68"; // Database
+$dat = "if0_40206118_i68";        // Databasenavn
 
-$tablestart = "impleor7_"; // Start paa tabeller i databasen
+$tablestart = "impleor7_";        // Præfiks til tabeller
 
-$charset = "utf-8"; // Tegnsaet
+$charset = "utf-8";               // Tegnsæt
 ?>
